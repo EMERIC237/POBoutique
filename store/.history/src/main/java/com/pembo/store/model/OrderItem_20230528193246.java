@@ -1,0 +1,38 @@
+package com.pembo.store.model;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "order_items")
+public class OrderItem {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "order_item_id")
+    private Long id;
+
+    private int quantity;
+
+    @Column(name = "price_title")
+    private int orderPrice;
+    
+    // default constructor
+    protected OrderItem() {
+    }
+
+    public OrderItem(int quantity, int orderPrice) {
+        this.quantity = quantity;
+        this.orderPrice = orderPrice;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    
+}
