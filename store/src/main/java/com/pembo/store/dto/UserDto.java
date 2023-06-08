@@ -1,70 +1,22 @@
 package com.pembo.store.dto;
 
-public class UserDto {
-    private Long id;
-    private String username;
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String role;
-    private String phoneNumber;
+import jakarta.validation.constraints.*;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 
-    public UserDto() {
-    }
+import java.io.Serializable;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
+/**
+ * DTO for {@link com.pembo.store.model.User}
+ */
+@EqualsAndHashCode(callSuper = true)
+@Value
+public record UserDto(Long id,
+                      @Size(max = 50) @NotEmpty @NotBlank(message = "Username cannot be empty") String username,
+                      @NotNull @Size(message = "incorrect password length", min = 6, max = 255) @NotEmpty(message = "Password cannot be empty") @NotBlank String password,
+                      @NotNull @Size(max = 255) @Email(message = "Incorrect email") @NotBlank(message = "Email cannot be empty") String email,
+                      @NotNull @Size(max = 255) String role,
+                      @NotNull @Size(max = 255) @NotBlank(message = "first name cannot be empty") String firstName,
+                      @NotNull @Size(max = 255) String lastName,
+                      @Size(message = "incorrect number", min = 8, max = 255) String phoneNumber) implements Serializable {
 }

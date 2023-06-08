@@ -1,43 +1,18 @@
 package com.pembo.store.dto;
 
-public class AddressDto {
-    private Long id;
-    private String street;
-    private String city;
-    private String region;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 
-    public AddressDto() {
-    }
+import java.io.Serializable;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getStreet() {
-        return street;
-    }
-
-    public void setStreet(String street) {
-        this.street = street;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getRegion() {
-        return region;
-    }
-
-    public void setRegion(String region) {
-        this.region = region;
-    }
+/**
+ * DTO for {@link com.pembo.store.model.Address}
+ */
+@EqualsAndHashCode(callSuper = true)
+@Value
+public record AddressDto(@NotNull Long id, @NotNull @Size(max = 255) String street,
+                         @NotNull @Size(max = 255) String city,
+                         @Size(max = 255) String region) implements Serializable {
 }

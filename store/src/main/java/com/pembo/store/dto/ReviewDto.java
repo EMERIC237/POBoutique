@@ -1,38 +1,20 @@
 package com.pembo.store.dto;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
+import org.hibernate.validator.constraints.Range;
 
-public class ReviewDto {
-    private float rating;
-    private String comment;
-    private String dateCreated;
-    private  static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+import java.io.Serializable;
+import java.time.LocalDate;
 
-    public ReviewDto() {
-    }
-
-    public float getRating() {
-        return rating;
-    }
-
-    public void setRating(float rating) {
-        this.rating = rating;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    public String getDateCreated() {
-        return dateCreated;
-    }
-
-    public void setDateCreated(Date dateCreated) {
-        this.dateCreated = dateFormat.format(dateCreated);
-    }
+/**
+ * DTO for {@link com.pembo.store.model.Review}
+ */
+@EqualsAndHashCode(callSuper = true)
+@Value
+public record ReviewDto(@NotNull Long id,
+                        @NotNull @Positive @Range(message = "rating must be between 1 and 5", min = 1, max = 5) Integer rating,
+                        @NotNull LocalDate date, String comment) implements Serializable {
 }

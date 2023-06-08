@@ -1,4 +1,4 @@
-package com.pembo.store.model;
+package com.pembo.store.model_test_from_emeric;
 
 import java.sql.Date;
 import java.util.ArrayList;

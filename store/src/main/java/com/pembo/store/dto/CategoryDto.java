@@ -1,25 +1,18 @@
 package com.pembo.store.dto;
 
-public class CategoryDto {
-    private String categoryName;
-    private Long id;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 
-    public CategoryDto() {
-    }
+import java.io.Serializable;
 
-    public String getCategoryName() {
-        return categoryName;
-    }
-
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+/**
+ * DTO for {@link com.pembo.store.model.Category}
+ */
+@EqualsAndHashCode(callSuper = true)
+@Value
+public record CategoryDto(Long id,
+                          @NotNull @Size(max = 255) @NotEmpty(message = "Category name cannot be empty") String name) implements Serializable {
 }

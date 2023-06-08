@@ -1,77 +1,26 @@
 package com.pembo.store.dto;
 
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.Value;
 
-public class OrderDto {
-    private Long id;
-    private String username;
-    private AddressDto address;
-    private Date orderDate;
-    private String status;
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.Set;
 
-    private BigDecimal totalPrice;
-
-    // the field for the items in the order
-    private List<OrderItemDto> items;
-
-    public OrderDto() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public AddressDto getAddress() {
-        return address;
-    }
-
-    public void setAddress(AddressDto address) {
-        this.address = address;
-    }
-
-    public Date getOrderDate() {
-        return orderDate;
-    }
-
-    public void setOrderDate(Date orderDate) {
-        this.orderDate = orderDate;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public BigDecimal getTotalPrice() {
-        return totalPrice;
-    }
-
-    public void setTotalPrice(BigDecimal totalPrice) {
-        this.totalPrice = totalPrice;
-    }
-
-    public List<OrderItemDto> getItems() {
-        return items;
-    }
-
-    public void setItems(List<OrderItemDto> items) {
-        this.items = items;
-    }
+/**
+ * DTO for {@link com.pembo.store.model.Order}
+ */
+@Value
+public class OrderDto implements Serializable {
+    Long id;
+    String userUsername;
+    @NotNull
+    AddressDto address;
+    @NotNull
+    LocalDate dateCreated;
+    @Size(max = 255)
+    String status;
+    @NotNull(message = "Order must have at least one item")
+    Set<OrderItemDto> orderItems;
 }
