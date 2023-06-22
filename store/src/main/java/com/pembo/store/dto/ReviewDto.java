@@ -12,8 +12,6 @@ import java.time.LocalDate;
 /**
  * DTO for {@link com.pembo.store.model.Review}
  */
-@EqualsAndHashCode(callSuper = true)
-@Value
 public record ReviewDto(@NotNull Long id,
                         @NotNull @Positive @Range(message = "rating must be between 1 and 5", min = 1, max = 5) Integer rating,
                         @NotNull LocalDate date, String comment) implements Serializable {

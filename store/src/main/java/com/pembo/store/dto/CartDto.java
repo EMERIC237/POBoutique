@@ -10,12 +10,6 @@ import java.util.Set;
 /**
  * DTO for {@link com.pembo.store.model.Cart}
  */
-@Value
-public class CartDto implements Serializable {
-    Long id;
-    Long userId;
-    String userUsername;
-    @NotNull
-    Set<CartItemDto> cartItems;
-    BigDecimal totalPrice;
+public record CartDto(Long id, Long userId, String userUsername, @NotNull Set<CartItemDto> cartItems,
+                      BigDecimal totalPrice) implements Serializable {
 }

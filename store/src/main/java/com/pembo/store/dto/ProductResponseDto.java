@@ -12,8 +12,6 @@ import java.util.List;
 /**
  * DTO for {@link com.pembo.store.model.Product}
  */
-@EqualsAndHashCode(callSuper = true)
-@Value
 public record ProductResponseDto(@NotNull Long id, @NotNull @Size(max = 255) String name,
                                  @Size(max = 255) String description, @NotNull BigDecimal price,
                                  @NotNull Integer stockQuantity, @NotNull @Size(max = 255) String imageUrl,

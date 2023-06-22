@@ -14,8 +14,6 @@ import java.util.List;
 /**
  * DTO for {@link com.pembo.store.model.Product}
  */
-@EqualsAndHashCode(callSuper = true)
-@Value
 public record ProductRequestDto(Long id, @NotNull @Size(max = 255) String name, @Size(max = 255) String description,
                                 @NotNull @PositiveOrZero(message = "price must be greater than zero") BigDecimal price,
                                 @NotNull @PositiveOrZero(message = "stock quantity cannot be negative") Integer stockQuantity,

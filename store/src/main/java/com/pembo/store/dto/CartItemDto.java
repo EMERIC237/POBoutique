@@ -10,15 +10,8 @@ import java.math.BigDecimal;
 /**
  * DTO for {@link com.pembo.store.model.CartItem}
  */
-@Value
-public class CartItemDto implements Serializable {
-    Long id;
-    Long productId;
-    String productName;
-    String productDescription;
-    BigDecimal productPrice;
-    String productImageUrl;
-    @Positive
-    @PositiveOrZero(message = "Quantity should be at least one")
-    Integer quantity;
+
+public record CartItemDto(Long id, Long productId, String productName, String productDescription,
+                          BigDecimal productPrice, String productImageUrl,
+                          @Positive @PositiveOrZero(message = "Quantity should be at least one") Integer quantity) implements Serializable {
 }

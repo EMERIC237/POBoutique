@@ -11,8 +11,6 @@ import java.io.Serializable;
 /**
  * DTO for {@link com.pembo.store.model.Category}
  */
-@EqualsAndHashCode(callSuper = true)
-@Value
 public record CategoryDto(Long id,
                           @NotNull @Size(max = 255) @NotEmpty(message = "Category name cannot be empty") String name) implements Serializable {
 }

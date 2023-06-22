@@ -9,8 +9,7 @@ import java.io.Serializable;
 /**
  * DTO for {@link com.pembo.store.model.User}
  */
-@EqualsAndHashCode(callSuper = true)
-@Value
+
 public record UserDto(Long id,
                       @Size(max = 50) @NotEmpty @NotBlank(message = "Username cannot be empty") String username,
                       @NotNull @Size(message = "incorrect password length", min = 6, max = 255) @NotEmpty(message = "Password cannot be empty") @NotBlank String password,
