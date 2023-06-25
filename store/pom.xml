@@ -94,7 +94,7 @@
                     <annotationProcessorPaths>
                         <!-- load lombok before mapStruct -->
                         <path>
-                            <groupId>org.projectlombok</groupId>
+                            <groupId>org.project-lombok</groupId>
                             <artifactId>lombok</artifactId>
                             <version>1.18.26</version>
                         </path>

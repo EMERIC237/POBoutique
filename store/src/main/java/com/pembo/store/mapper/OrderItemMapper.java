@@ -15,5 +15,6 @@ public interface OrderItemMapper {
     OrderItemDto toDto(OrderItem orderItem);
 
     @InheritInverseConfiguration
+    @Mapping(target = "order", ignore = true)
     OrderItem toEntity(OrderItemDto orderItemDto);
 }
