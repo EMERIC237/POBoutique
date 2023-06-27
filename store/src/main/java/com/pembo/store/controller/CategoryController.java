@@ -7,11 +7,11 @@ import com.pembo.store.service.CategoryService;
 
 @RestController
 @RequestMapping("api/v1/categories")
-public class CayegoryController {
+public class CategoryController {
 
     private final CategoryService categoryService;
 
-    public CayegoryController(CategoryService categoryService){
+    public CategoryController(CategoryService categoryService){
         this.categoryService = categoryService;
     }
 

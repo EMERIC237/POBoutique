@@ -9,10 +9,10 @@ public interface ProductCategoryMapper {
 
     @Mapping(target="id", source = "id")
     @Mapping(target = "category", source = "category")
+    @Mapping(target = "product", source = "product")
     ProductCategoryDto toDto(ProductCategory productCategory);
 
      @InheritInverseConfiguration
-     @Mapping(target = "product", ignore = true)
     ProductCategory toEntity(ProductCategoryDto productCategoryDto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

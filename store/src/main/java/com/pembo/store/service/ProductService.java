@@ -1,42 +1,36 @@
 package com.pembo.store.service;
 
-import com.pembo.store.dto.ProductRequestDto;
-import com.pembo.store.dto.ProductResponseDto;
+import com.pembo.store.dto.*;
+import com.pembo.store.mapper.ProductCategoryMapper;
 import com.pembo.store.mapper.ProductRequestMapper;
 import com.pembo.store.mapper.ProductResponseMapper;
 import com.pembo.store.model.Product;
-import com.pembo.store.repository.CartItemRepository;
-import com.pembo.store.repository.CategoryRepository;
-import com.pembo.store.repository.ProductCategoryRepository;
+import com.pembo.store.model.ProductCategory;
 import com.pembo.store.repository.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final CategoryRepository categoryRepository;
-    private final ProductCategoryRepository productCategoryRepository;
     private final ProductResponseMapper productResponseMapper;
     private final ProductRequestMapper productRequestMapper;
-    private final CartItemRepository cartItemRepository;
+    private final CategoryService categoryService;
+    private final ProductCategoryService productCategoryService;
 
-    // inject the dependencies in the constructor
-    @Autowired
-    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository,
-            ProductCategoryRepository productCategoryRepository, ProductResponseMapper productResponseMapper,
-            ProductRequestMapper productRequestMapper, CartItemRepository cartItemRepository) {
+    public ProductService(ProductRepository productRepository, ProductResponseMapper productResponseMapper, ProductRequestMapper productRequestMapper, CategoryService categoryService, ProductCategoryService productCategoryService) {
         this.productRepository = productRepository;
-        this.categoryRepository = categoryRepository;
-        this.productCategoryRepository = productCategoryRepository;
         this.productResponseMapper = productResponseMapper;
         this.productRequestMapper = productRequestMapper;
-        this.cartItemRepository = cartItemRepository;
+        this.categoryService = categoryService;
+        this.productCategoryService = productCategoryService;
     }
 
     public List<ProductResponseDto> getAllProducts() {
@@ -44,39 +38,34 @@ public class ProductService {
     }
 
     public ProductResponseDto getProductById(Long id) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product Not found"));
+        Product product = productRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Product Not found"));
         return productResponseMapper.toDto(product);
     }
 
     @Transactional
     public ProductResponseDto saveProduct(ProductRequestDto productRequestDto) {
         Product product = productRequestMapper.toEntity(productRequestDto);
-
-        // handle the categories
-        // Product finalProduct = product;
-        // productRequestDto.getCategories().forEach(categoryName -> {
-        //     Category category = categoryRepository.findByName(categoryName);
-        //     // if category does not exist, create it and save it to the database
-        //     if (category == null) {
-        //         category = new Category();
-        //         category.setName(categoryName);
-        //         category = categoryRepository.save(category);
-        //     }
-
-        //     ProductCategory productCategory = new ProductCategory();
-        //     productCategory.setProduct(finalProduct);
-        //     productCategory.setCategory(category);
-        //     productCategoryRepository.save(productCategory);
-        // });
-
+        Set<ProductCategory> productCategories = new LinkedHashSet<>();
         Product savedProduct = productRepository.save(product);
 
+        // get a productDto
+        ProductDto productDto = new ProductDto();
+        productDto.setId(savedProduct.getId());
+        productDto.setName(productRequestDto.name());
+        productDto.setImageUrl(productRequestDto.imageUrl());
+
+        productRequestDto.categories().forEach(categoryName -> {
+            CategoryDto fetchedCategory = categoryService.createOrFindCategory(categoryName);
+            productCategories.add(productCategoryService.manageProductCategory(productDto, fetchedCategory));
+        });
+
+        savedProduct.setProductCategories(productCategories);
         return productResponseMapper.toDto(savedProduct);
     }
 
-
+    @Transactional
     public ProductResponseDto updateProduct(Long id, ProductRequestDto productRequestDto) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product Not found"));
+        Product product = productRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Product Not found"));
         productRequestMapper.partialUpdate(productRequestDto, product);
         Product savedProduct = productRepository.save(product);
         return productResponseMapper.toDto(savedProduct);
@@ -85,5 +74,4 @@ public class ProductService {
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
     }
-
 }

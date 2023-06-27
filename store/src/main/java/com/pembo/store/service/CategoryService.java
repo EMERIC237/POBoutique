@@ -1,14 +1,17 @@
 package com.pembo.store.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.pembo.store.dto.CategoryDto;
 import com.pembo.store.mapper.CategoryMapper;
 import com.pembo.store.model.Category;
 import com.pembo.store.repository.CategoryRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CategoryService {
@@ -24,7 +27,7 @@ public class CategoryService {
 
     /**
      * get all categories
-     * 
+     *
      * @return List of all categories
      */
     public List<CategoryDto> getAllCategories() {
@@ -33,33 +36,46 @@ public class CategoryService {
 
     /**
      * get category by id
-     * 
+     *
      * @param id
      * @return category
      */
-    public CategoryDto getCategoryById(Long id){
-        return categoryMapper.toDto(categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Category Not found")));
+    public CategoryDto getCategoryById(Long id) {
+        return categoryMapper.toDto(categoryRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Category with id " + id + " not found")));
+    }
+
+    public Optional<CategoryDto> getCategoryByName(String name) {
+        return categoryRepository.findByName(name.toUpperCase()).map(categoryMapper::toDto);
     }
 
     /**
      * save category
-     * 
+     *
      * @param category
      * @return saved category
      */
     public CategoryDto saveCategory(CategoryDto category) {
-        return categoryMapper.toDto(categoryRepository.save(categoryMapper.toEntity(category)));
+        // Convert name to uppercase
+        CategoryDto categoryToSave = new CategoryDto(category.id(), category.name().toUpperCase());
+
+        return categoryMapper.toDto(categoryRepository.save(categoryMapper.toEntity(categoryToSave)));
     }
+
+    public CategoryDto createOrFindCategory(String category) {
+        return getCategoryByName(category).orElseGet(() -> saveCategory(new CategoryDto(null, category)));
+    }
+
 
     /**
      * update category
-     * 
+     *
      * @param id
      * @param category
      * @return updated category
      */
+    @Transactional
     public CategoryDto updateCategory(Long id, CategoryDto category) {
-        Category toUpdateCategory = categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Category not found"));
+        Category toUpdateCategory = categoryRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Category with id " + id + " not found"));
         categoryMapper.partialUpdate(category, toUpdateCategory);
         Category savedCategory = categoryRepository.save(toUpdateCategory);
         return categoryMapper.toDto(savedCategory);
@@ -68,7 +84,7 @@ public class CategoryService {
 
     /**
      * delete category by id
-     * 
+     *
      * @param id
      */
     public void deleteCategory(Long id) {
