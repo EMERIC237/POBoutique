@@ -1,6 +1,7 @@
 package com.pembo.store.service;
 
 import com.pembo.store.dto.UserDto;
+import com.pembo.store.exception.ResourceNotFoundException;
 import com.pembo.store.mapper.UserMapper;
 import com.pembo.store.model.User;
 import com.pembo.store.repository.UserRepository;
@@ -24,12 +25,16 @@ public class UserService {
     }
 
     public List<UserDto> getAllUsers() {
-        return userRepository.findAll().stream().map(userMapper::toDto).collect(Collectors.toList());
+        return userRepository.findAll()
+                             .stream()
+                             .map(userMapper::toDto)
+                             .collect(Collectors.toList());
     }
 
     public UserDto getUserById(Long id) {
         Optional<User> user = userRepository.findById(id);
-        return userMapper.toDto(user.orElseThrow(() -> new RuntimeException("User Not found")));
+        return userMapper.toDto(user.orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not " +
+                                                                                             "found")));
     }
 
     public UserDto saveUser(UserDto userDto) {
@@ -39,7 +44,9 @@ public class UserService {
     }
 
     public UserDto updateUser(Long id, UserDto userDto) {
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User Not found"));
+        User user = userRepository.findById(id)
+                                  .orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not " +
+                                                                                           "found"));
         userMapper.partialUpdate(userDto, user);
         User savedUser = userRepository.save(user);
         return userMapper.toDto(savedUser);

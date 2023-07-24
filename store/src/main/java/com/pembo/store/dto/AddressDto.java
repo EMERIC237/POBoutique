@@ -10,7 +10,7 @@ import java.io.Serializable;
 /**
  * DTO for {@link com.pembo.store.model.Address}
  */
-public record AddressDto(@NotNull Long id, @NotNull @Size(max = 255) String street,
+public record AddressDto(Long id, Long userId, @NotNull @Size(max = 255) String street,
                          @NotNull @Size(max = 255) String city,
                          @Size(max = 255) String region) implements Serializable {
 }

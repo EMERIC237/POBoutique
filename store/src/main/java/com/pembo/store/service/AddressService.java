@@ -1,6 +1,8 @@
 package com.pembo.store.service;
 
 import com.pembo.store.dto.AddressDto;
+import com.pembo.store.dto.UserDto;
+import com.pembo.store.exception.ResourceNotFoundException;
 import com.pembo.store.mapper.AddressMapper;
 import com.pembo.store.model.Address;
 import com.pembo.store.repository.AddressRepository;
@@ -15,12 +17,15 @@ import java.util.stream.Collectors;
 public class AddressService {
 
     private final AddressRepository addressRepository;
+
+    private final UserService userService;
     private final AddressMapper addressMapper;
 
     @Autowired
-    public AddressService(AddressRepository addressRepository, AddressMapper addressMapper) {
+    public AddressService(AddressRepository addressRepository, AddressMapper addressMapper, UserService userService) {
         this.addressRepository = addressRepository;
         this.addressMapper = addressMapper;
+        this.userService = userService;
     }
 
     /**
@@ -29,7 +34,10 @@ public class AddressService {
      * @return List of all addresses
      */
     public List<AddressDto> getAllAddresses() {
-        return addressRepository.findAll().stream().map(addressMapper::toDto).collect(Collectors.toList());
+        return addressRepository.findAll()
+                                .stream()
+                                .map(addressMapper::toDto)
+                                .collect(Collectors.toList());
     }
 
     /**
@@ -40,7 +48,15 @@ public class AddressService {
      */
     public AddressDto getAddressById(Long id) {
         Optional<Address> address = addressRepository.findById(id);
-        return addressMapper.toDto(address.orElseThrow(() -> new RuntimeException("Address not found")));
+        return addressMapper.toDto(address.orElseThrow(() -> new ResourceNotFoundException("Address with id " + id +
+                                                                                                   " not " + "found")));
+    }
+
+    public List<AddressDto> getAddressesByUserId(long userId) {
+        List<Address> userAddresses = addressRepository.findByUserId(userId);
+        return userAddresses.stream()
+                            .map(addressMapper::toDto)
+                            .collect(Collectors.toList());
     }
 
     /**
@@ -50,6 +66,8 @@ public class AddressService {
      * @return saved address
      */
     public AddressDto saveAddress(AddressDto addressDto) {
+        // Check if user exist first
+        UserDto userDto = userService.getUserById(addressDto.userId());
         Address address = addressMapper.toEntity(addressDto);
         Address savedAddress = addressRepository.save(address);
         return addressMapper.toDto(savedAddress);
@@ -58,11 +76,12 @@ public class AddressService {
 
     public AddressDto updateAddress(Long id, AddressDto addressDto) {
         return addressRepository.findById(id)
-                .map(address -> {
-                    addressMapper.partialUpdate(addressDto, address);
-                    return addressMapper.toDto(addressRepository.save(address));
-                })
-                .orElseThrow(() -> new RuntimeException("Address not found"));
+                                .map(address -> {
+                                    addressMapper.partialUpdate(addressDto, address);
+                                    return addressMapper.toDto(addressRepository.save(address));
+                                })
+                                .orElseThrow(() -> new ResourceNotFoundException("Address with id " + id + " not " +
+                                                                                         "found"));
     }
 
     public void deleteAddress(Long id) {
