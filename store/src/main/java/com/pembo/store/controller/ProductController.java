@@ -3,6 +3,7 @@ package com.pembo.store.controller;
 import com.pembo.store.dto.ProductRequestDto;
 import com.pembo.store.dto.ProductResponseDto;
 import com.pembo.store.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,12 +29,12 @@ public class ProductController {
     }
 
     @PostMapping
-    public ProductResponseDto createProduct(@RequestBody ProductRequestDto productRequestDto) {
+    public ProductResponseDto createProduct(@Valid @RequestBody ProductRequestDto productRequestDto) {
         return productService.saveProduct(productRequestDto);
     }
 
     @PutMapping("/{id}")
-    public ProductResponseDto updateProduct(@PathVariable Long id, @RequestBody ProductRequestDto productRequestDto) {
+    public ProductResponseDto updateProduct(@PathVariable Long id, @Valid @RequestBody ProductRequestDto productRequestDto) {
         return productService.updateProduct(id, productRequestDto);
     }
 

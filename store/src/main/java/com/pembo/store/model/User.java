@@ -32,10 +32,9 @@ public class User {
     @Column(name = "email", nullable = false)
     private String email;
 
-    @Size(max = 255)
-    @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    private String role;
+    private UserRole role;
 
     @Size(max = 255)
     @NotNull
@@ -64,3 +63,4 @@ public class User {
     private Set<Cart> carts = new LinkedHashSet<>();
 
 }
+
