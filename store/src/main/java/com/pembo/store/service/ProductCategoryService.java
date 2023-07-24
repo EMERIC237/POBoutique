@@ -31,8 +31,13 @@ public class ProductCategoryService {
 
     public ProductCategory manageProductCategory(ProductDto productDto, CategoryDto categoryDto) {
         ProductCategoryDto productCategoryDto = new ProductCategoryDto(null, productDto, categoryDto);
-        ProductCategoryDto fetchedProductCategoryDto = createProductCategory(productCategoryDto);
-        return productCategoryMapper.toEntity(fetchedProductCategoryDto);
+        Optional<ProductCategoryDto> existingProductCategoryDto = findByProductAndCategory(productDto, categoryDto);
+        if(existingProductCategoryDto.isPresent()){
+            return productCategoryMapper.toEntity(existingProductCategoryDto.get());
+        } else {
+            ProductCategoryDto fetchedProductCategoryDto = createProductCategory(productCategoryDto);
+            return productCategoryMapper.toEntity(fetchedProductCategoryDto);
+        }
     }
     public Optional<ProductCategoryDto> getProductCategoryById(Long id) {
         return productCategoryRepository.findById(id).map(productCategoryMapper::toDto);
@@ -46,6 +51,19 @@ public class ProductCategoryService {
             return productCategoryMapper.toDto(updatedProductCategory);
         });
     }
+    public void removeProductCategory(ProductDto productDto, CategoryDto categoryDto) {
+        ProductCategoryDto productCategoryDto = new ProductCategoryDto(null, productDto, categoryDto);
+        ProductCategory productCategory = productCategoryMapper.toEntity(productCategoryDto);
+        productCategoryRepository.delete(productCategory);
+    }
+
+    public Optional<ProductCategoryDto> findByProductAndCategory(ProductDto productDto, CategoryDto categoryDto) {
+        ProductCategoryDto productCategoryDto = new ProductCategoryDto(null, productDto, categoryDto);
+        ProductCategory productCategory = productCategoryMapper.toEntity(productCategoryDto);
+        return productCategoryRepository.findByProductAndCategory(productCategory.getProduct(), productCategory.getCategory())
+                .map(productCategoryMapper::toDto);
+    }
+
 
     public void deleteProductCategory(Long id) {
         productCategoryRepository.deleteById(id);

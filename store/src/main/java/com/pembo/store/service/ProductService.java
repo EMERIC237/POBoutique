@@ -4,6 +4,7 @@ import com.pembo.store.dto.*;
 import com.pembo.store.mapper.ProductCategoryMapper;
 import com.pembo.store.mapper.ProductRequestMapper;
 import com.pembo.store.mapper.ProductResponseMapper;
+import com.pembo.store.model.Category;
 import com.pembo.store.model.Product;
 import com.pembo.store.model.ProductCategory;
 import com.pembo.store.repository.ProductRepository;
@@ -25,6 +26,7 @@ public class ProductService {
     private final CategoryService categoryService;
     private final ProductCategoryService productCategoryService;
 
+    // Constructor with dependency injection
     public ProductService(ProductRepository productRepository, ProductResponseMapper productResponseMapper, ProductRequestMapper productRequestMapper, CategoryService categoryService, ProductCategoryService productCategoryService) {
         this.productRepository = productRepository;
         this.productResponseMapper = productResponseMapper;
@@ -45,21 +47,10 @@ public class ProductService {
     @Transactional
     public ProductResponseDto saveProduct(ProductRequestDto productRequestDto) {
         Product product = productRequestMapper.toEntity(productRequestDto);
-        Set<ProductCategory> productCategories = new LinkedHashSet<>();
         Product savedProduct = productRepository.save(product);
 
-        // get a productDto
-        ProductDto productDto = new ProductDto();
-        productDto.setId(savedProduct.getId());
-        productDto.setName(productRequestDto.name());
-        productDto.setImageUrl(productRequestDto.imageUrl());
+        manageProductCategories(productRequestDto.categories(), savedProduct);
 
-        productRequestDto.categories().forEach(categoryName -> {
-            CategoryDto fetchedCategory = categoryService.createOrFindCategory(categoryName);
-            productCategories.add(productCategoryService.manageProductCategory(productDto, fetchedCategory));
-        });
-
-        savedProduct.setProductCategories(productCategories);
         return productResponseMapper.toDto(savedProduct);
     }
 
@@ -67,11 +58,37 @@ public class ProductService {
     public ProductResponseDto updateProduct(Long id, ProductRequestDto productRequestDto) {
         Product product = productRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Product Not found"));
         productRequestMapper.partialUpdate(productRequestDto, product);
+
         Product savedProduct = productRepository.save(product);
+
+        manageProductCategories(productRequestDto.categories(), savedProduct);
+
         return productResponseMapper.toDto(savedProduct);
     }
 
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
+    }
+
+    private void manageProductCategories(List<String> categoryNames, Product product) {
+        Set<ProductCategory> updatedProductCategories = new LinkedHashSet<>();
+        ProductDto productDto = getProductDtoFromProduct(product);
+        categoryNames.forEach(categoryName -> {
+            CategoryDto fetchedCategory = categoryService.createOrFindCategory(categoryName);
+            updatedProductCategories.add(productCategoryService.manageProductCategory(productDto, fetchedCategory));
+        });
+
+        // Remove old categories that are not in the updated list
+
+        product.getProductCategories().removeIf(productCategory -> !updatedProductCategories.contains(productCategory));
+        product.setProductCategories(updatedProductCategories);
+    }
+
+    private ProductDto getProductDtoFromProduct(Product product) {
+        ProductDto productDto = new ProductDto();
+        productDto.setId(product.getId());
+        productDto.setName(product.getName());
+        productDto.setImageUrl(product.getImageUrl());
+        return productDto;
     }
 }

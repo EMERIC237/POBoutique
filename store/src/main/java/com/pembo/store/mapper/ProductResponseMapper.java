@@ -1,6 +1,5 @@
 package com.pembo.store.mapper;
 
-
 import com.pembo.store.dto.CategoryDto;
 import com.pembo.store.dto.ProductResponseDto;
 import com.pembo.store.model.Category;
@@ -14,6 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 
+//!TODO: Find a way to implement this mathcing without using Xml since using string to call function can lead to errors
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = "spring", uses = CategoryMapper.class)
 public abstract class ProductResponseMapper {
 
@@ -29,17 +29,11 @@ public abstract class ProductResponseMapper {
     public abstract ProductResponseDto toDto(Product product);
 
     protected List<CategoryDto> getCategoryList(Set<ProductCategory> productCategories) {
-        return productCategories.stream()
-                .map(ProductCategory::getCategory)
-                .map(this::toDto)
-                .collect(Collectors.toList());
+        return productCategories.stream().map(ProductCategory::getCategory).map(this::toDto).collect(Collectors.toList());
     }
 
     protected Double getAverageRating(Product product) {
-        return product.getReviews().stream()
-                .mapToDouble(Review::getRating)
-                .average()
-                .orElse(0.0);
+        return product.getReviews().stream().mapToDouble(Review::getRating).average().orElse(0.0);
     }
 
     protected abstract CategoryDto toDto(Category category);
