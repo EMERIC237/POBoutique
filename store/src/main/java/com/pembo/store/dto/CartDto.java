@@ -11,21 +11,6 @@ import lombok.Data;
 /**
  * DTO for {@link com.pembo.store.model.Cart}
  */
-@Data
-public class CartDto implements Serializable {
-    private Long id;
-    private Long userId;
-    private String userUsername;
-    @NotNull
-    private Set<CartItemDto> cartItems;
-    private BigDecimal totalPrice;
-
-    public CartDto(Long id, Long userId, String userUsername, @NotNull Set<CartItemDto> cartItems,
-                   BigDecimal totalPrice) {
-        this.id = id;
-        this.userId = userId;
-        this.userUsername = userUsername;
-        this.cartItems = cartItems;
-        this.totalPrice = totalPrice;
-    }
+public record CartDto(Long id, Long userId, String userUsername, @NotNull Set<CartItemDto> cartItems,
+                      BigDecimal totalPrice) implements Serializable {
 }
