@@ -16,13 +16,8 @@ public class UserCartController {
     }
 
     @GetMapping
-    public List<CartDto> getAllUserCarts(@PathVariable Long userId) {
-        return cartService.getAllUserCarts(userId);
-    }
-
-    @GetMapping("/{id}")
-    public CartDto getUserCartById(@PathVariable Long userId, @PathVariable Long id) {
-        return cartService.getCartById(userId, id);
+    public CartDto getUserCart(@PathVariable Long userId) {
+        return cartService.getUserCart(userId);
     }
 
     @PostMapping
@@ -30,13 +25,13 @@ public class UserCartController {
         return cartService.saveCart(userId);
     }
 
-    @PutMapping("/{id}")
-    public CartDto updateUserCart(@PathVariable Long id, @RequestBody CartDto cartDto) {
-        return cartService.updateCart(id, cartDto);
+    @PutMapping
+    public CartDto updateUserCart(@PathVariable Long userId, @RequestBody CartDto cartDto) {
+        return cartService.updateCart(userId, cartDto);
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteUserCart(@PathVariable Long id) {
-        cartService.deleteCart(id);
+    @DeleteMapping
+    public void deleteUserCart(@PathVariable Long userId) {
+        cartService.deleteCart(userId);
     }
 }

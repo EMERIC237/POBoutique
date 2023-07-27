@@ -5,6 +5,7 @@ import com.pembo.store.dto.CartDto;
 import com.pembo.store.model.Address;
 import com.pembo.store.model.Cart;
 import com.pembo.store.model.CartItem;
+import com.pembo.store.model.User;
 import org.mapstruct.*;
 
 import java.math.BigDecimal;
@@ -20,10 +21,16 @@ public interface CartMapper {
     CartDto toDto(Cart cart);
 
 
-    @Mapping(target = "user.id", source = "userId")
-    @Mapping(target = "user.username", source = "userUsername")
-    @Mapping(target = "cartItems", source = "cartItems")
+    @Mapping(target = "user", source = "userId", qualifiedByName = "mapUser")
     Cart toEntity(CartDto cartDto);
+
+    @Named("mapUser")
+    default User mapUser(Long userId) {
+        User user = new User();
+        user.setId(userId);
+        return user;
+    }
+
     default BigDecimal calculateTotal(Set<CartItem> cartItems) {
         return cartItems.stream()
                 .map(cartItem -> cartItem.getProduct().getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())))
