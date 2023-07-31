@@ -1,6 +1,7 @@
 package com.pembo.store.service;
 
 import com.pembo.store.dto.*;
+import com.pembo.store.exception.ResourceNotFoundException;
 import com.pembo.store.mapper.ProductCategoryMapper;
 import com.pembo.store.mapper.ProductRequestMapper;
 import com.pembo.store.mapper.ProductResponseMapper;
@@ -40,7 +41,7 @@ public class ProductService {
     }
 
     public ProductResponseDto getProductById(Long id) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Product Not found"));
+        Product product = findProductById(id);
         return productResponseMapper.toDto(product);
     }
 
@@ -56,7 +57,7 @@ public class ProductService {
 
     @Transactional
     public ProductResponseDto updateProduct(Long id, ProductRequestDto productRequestDto) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Product Not found"));
+        Product product = findProductById(id);
         productRequestMapper.partialUpdate(productRequestDto, product);
 
         Product savedProduct = productRepository.save(product);
@@ -67,6 +68,9 @@ public class ProductService {
     }
 
     public void deleteProduct(Long id) {
+        Product product = findProductById(id);
+        product.getProductCategories().forEach(productCategory ->
+                productCategoryService.deleteProductCategoryByProductAndCategory(product, productCategory.getCategory()));
         productRepository.deleteById(id);
     }
 
@@ -75,20 +79,30 @@ public class ProductService {
         ProductDto productDto = getProductDtoFromProduct(product);
         categoryNames.forEach(categoryName -> {
             CategoryDto fetchedCategory = categoryService.createOrFindCategory(categoryName);
-            updatedProductCategories.add(productCategoryService.manageProductCategory(productDto, fetchedCategory));
+            updatedProductCategories.add(productCategoryService.getOrCreateProductCategory(productDto, fetchedCategory));
         });
 
         // Remove old categories that are not in the updated list
-
         product.getProductCategories().removeIf(productCategory -> !updatedProductCategories.contains(productCategory));
         product.setProductCategories(updatedProductCategories);
     }
 
-    private ProductDto getProductDtoFromProduct(Product product) {
+    //!TODO: transform this into a function the simply fetch product and return as ProductDto
+    public ProductDto getProductDtoFromProduct(Product product) {
         ProductDto productDto = new ProductDto();
         productDto.setId(product.getId());
         productDto.setName(product.getName());
         productDto.setImageUrl(product.getImageUrl());
         return productDto;
+    }
+
+    public Product findProductById(Long productId) {
+        return productRepository.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Product", productId));
+    }
+
+    public List<Product> findProductsByIds(List<Long> productIds) {
+        return productIds.stream()
+                .map(this::findProductById)
+                .collect(Collectors.toList());
     }
 }

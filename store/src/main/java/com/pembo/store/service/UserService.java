@@ -26,15 +26,14 @@ public class UserService {
 
     public List<UserDto> getAllUsers() {
         return userRepository.findAll()
-                             .stream()
-                             .map(userMapper::toDto)
-                             .collect(Collectors.toList());
+                .stream()
+                .map(userMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     public UserDto getUserById(Long id) {
-        Optional<User> user = userRepository.findById(id);
-        return userMapper.toDto(user.orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not " +
-                                                                                             "found")));
+        User user = findUserById(id);
+        return userMapper.toDto(user);
     }
 
     public UserDto saveUser(UserDto userDto) {
@@ -44,15 +43,18 @@ public class UserService {
     }
 
     public UserDto updateUser(Long id, UserDto userDto) {
-        User user = userRepository.findById(id)
-                                  .orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not " +
-                                                                                           "found"));
+        User user = findUserById(id);
         userMapper.partialUpdate(userDto, user);
         User savedUser = userRepository.save(user);
         return userMapper.toDto(savedUser);
     }
 
-    public void delete(Long id) {
+    public void deleteUserById(Long id) {
         userRepository.deleteById(id);
     }
+
+    public User findUserById(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId));
+    }
+
 }

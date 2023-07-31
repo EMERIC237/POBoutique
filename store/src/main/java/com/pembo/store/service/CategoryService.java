@@ -5,8 +5,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.pembo.store.dto.CategoryDto;
+import com.pembo.store.exception.ResourceNotFoundException;
 import com.pembo.store.mapper.CategoryMapper;
 import com.pembo.store.model.Category;
+import com.pembo.store.model.Product;
 import com.pembo.store.repository.CategoryRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +43,7 @@ public class CategoryService {
      * @return category
      */
     public CategoryDto getCategoryById(Long id) {
-        return categoryMapper.toDto(categoryRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Category with id " + id + " not found")));
+        return categoryMapper.toDto(findCategoryById(id));
     }
 
     public Optional<CategoryDto> getCategoryByName(String name) {
@@ -75,7 +77,7 @@ public class CategoryService {
      */
     @Transactional
     public CategoryDto updateCategory(Long id, CategoryDto category) {
-        Category toUpdateCategory = categoryRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Category with id " + id + " not found"));
+        Category toUpdateCategory = findCategoryById(id);
         categoryMapper.partialUpdate(category, toUpdateCategory);
         Category savedCategory = categoryRepository.save(toUpdateCategory);
         return categoryMapper.toDto(savedCategory);
@@ -89,6 +91,10 @@ public class CategoryService {
      */
     public void deleteCategory(Long id) {
         categoryRepository.deleteById(id);
+    }
+
+    public Category findCategoryById(Long categoryId) {
+        return categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", categoryId));
     }
 
 }

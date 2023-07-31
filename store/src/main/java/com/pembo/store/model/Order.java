@@ -34,9 +34,9 @@ public class Order {
     @Column(name = "date_created", nullable = false)
     private LocalDate dateCreated;
 
-    @Size(max = 255)
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private String status;
+    private OrderStatus status;
 
     @OneToMany(mappedBy = "order")
     private Set<OrderItem> orderItems = new LinkedHashSet<>();

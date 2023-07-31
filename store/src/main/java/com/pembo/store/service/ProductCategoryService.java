@@ -3,7 +3,10 @@ package com.pembo.store.service;
 import com.pembo.store.dto.CategoryDto;
 import com.pembo.store.dto.ProductCategoryDto;
 import com.pembo.store.dto.ProductDto;
+import com.pembo.store.exception.ResourceNotFoundException;
 import com.pembo.store.mapper.ProductCategoryMapper;
+import com.pembo.store.model.Category;
+import com.pembo.store.model.Product;
 import com.pembo.store.model.ProductCategory;
 import com.pembo.store.repository.ProductCategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,32 +32,30 @@ public class ProductCategoryService {
         return productCategoryMapper.toDto(savedProductCategory);
     }
 
-    public ProductCategory manageProductCategory(ProductDto productDto, CategoryDto categoryDto) {
+    public ProductCategory getOrCreateProductCategory(ProductDto productDto, CategoryDto categoryDto) {
         ProductCategoryDto productCategoryDto = new ProductCategoryDto(null, productDto, categoryDto);
         Optional<ProductCategoryDto> existingProductCategoryDto = findByProductAndCategory(productDto, categoryDto);
-        if(existingProductCategoryDto.isPresent()){
+        if (existingProductCategoryDto.isPresent()) {
             return productCategoryMapper.toEntity(existingProductCategoryDto.get());
         } else {
             ProductCategoryDto fetchedProductCategoryDto = createProductCategory(productCategoryDto);
             return productCategoryMapper.toEntity(fetchedProductCategoryDto);
         }
     }
-    public Optional<ProductCategoryDto> getProductCategoryById(Long id) {
-        return productCategoryRepository.findById(id).map(productCategoryMapper::toDto);
+
+    public ProductCategoryDto findProductCategoryById(Long id) {
+        return productCategoryRepository.findById(id)
+                .map(productCategoryMapper::toDto)
+                .orElseThrow(() -> new ResourceNotFoundException("ProductCategory", id));
     }
 
-    public Optional<ProductCategoryDto> updateProductCategory(Long id, ProductCategoryDto productCategoryDto) {
+    public ProductCategoryDto updateProductCategory(Long id, ProductCategoryDto productCategoryDto) {
         return productCategoryRepository.findById(id).map(existingProductCategory -> {
             ProductCategory updatedProductCategory = productCategoryMapper.toEntity(productCategoryDto);
             updatedProductCategory.setId(existingProductCategory.getId());
             updatedProductCategory = productCategoryRepository.save(updatedProductCategory);
             return productCategoryMapper.toDto(updatedProductCategory);
-        });
-    }
-    public void removeProductCategory(ProductDto productDto, CategoryDto categoryDto) {
-        ProductCategoryDto productCategoryDto = new ProductCategoryDto(null, productDto, categoryDto);
-        ProductCategory productCategory = productCategoryMapper.toEntity(productCategoryDto);
-        productCategoryRepository.delete(productCategory);
+        }).orElseThrow(() -> new ResourceNotFoundException("ProductCategory", id));
     }
 
     public Optional<ProductCategoryDto> findByProductAndCategory(ProductDto productDto, CategoryDto categoryDto) {
@@ -64,8 +65,14 @@ public class ProductCategoryService {
                 .map(productCategoryMapper::toDto);
     }
 
-
     public void deleteProductCategory(Long id) {
         productCategoryRepository.deleteById(id);
     }
+
+    public void deleteProductCategoryByProductAndCategory(Product product, Category category) {
+        ProductCategory productCategory = productCategoryRepository.findByProductAndCategory(product, category)
+                .orElseThrow(() -> new ResourceNotFoundException("ProductCategory not found for given Product and Category"));
+        productCategoryRepository.delete(productCategory);
+    }
+
 }
